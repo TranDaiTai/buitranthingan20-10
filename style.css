@@ -348,15 +348,19 @@ body::before {
   margin: 0 auto;
 }
 
-/* Thiết kế Phong Bì 3D */
+/* Thiết kế Phong Bì 3D Fluid & Responsive */
 .envelope-card-container {
-  width: 100%;
-  max-width: 360px;
-  height: 240px;
+  --env-w: min(360px, calc(100vw - 36px));
+  --env-h: calc(var(--env-w) * 0.667);
+  --env-half-w: calc(var(--env-w) / 2);
+  --env-half-h: calc(var(--env-h) / 2);
+  --env-flap-h: calc(var(--env-h) * 0.583);
+  width: var(--env-w);
+  height: var(--env-h);
   perspective: 1000px;
   cursor: pointer;
   position: relative;
-  margin: 10px 0;
+  margin: 10px auto;
   outline: none;
 }
 
@@ -397,15 +401,15 @@ body::before {
 .envelope-letter-peek {
   position: absolute;
   top: 15px;
-  left: 20px;
-  right: 20px;
-  height: 190px;
+  left: 15px;
+  right: 15px;
+  height: calc(var(--env-h) * 0.82);
   background: #FFF;
   border-radius: var(--border-radius-sm);
   border: 1px solid #EED8CD;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
   z-index: 2;
-  padding: 18px 16px;
+  padding: 16px 14px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -453,7 +457,7 @@ body::before {
   width: 0;
   height: 0;
   border-style: solid;
-  border-width: 120px 0 120px 180px;
+  border-width: var(--env-half-h) 0 var(--env-half-h) var(--env-half-w);
   border-color: transparent transparent transparent #F7E5D8;
   z-index: 3;
   border-bottom-left-radius: var(--border-radius-md);
@@ -467,7 +471,7 @@ body::before {
   width: 0;
   height: 0;
   border-style: solid;
-  border-width: 120px 180px 120px 0;
+  border-width: var(--env-half-h) var(--env-half-w) var(--env-half-h) 0;
   border-color: transparent #F2DFD1 transparent transparent;
   z-index: 3;
   border-bottom-right-radius: var(--border-radius-md);
@@ -482,7 +486,7 @@ body::before {
   width: 0;
   height: 0;
   border-style: solid;
-  border-width: 0 180px 140px 180px;
+  border-width: 0 var(--env-half-w) var(--env-flap-h) var(--env-half-w);
   border-color: transparent transparent #EEDAC9 transparent;
   z-index: 4;
   border-bottom-left-radius: var(--border-radius-md);
@@ -497,7 +501,7 @@ body::before {
   width: 0;
   height: 0;
   border-style: solid;
-  border-width: 140px 180px 0 180px;
+  border-width: var(--env-flap-h) var(--env-half-w) 0 var(--env-half-w);
   border-color: #E6D0BE transparent transparent transparent;
   transform-origin: top center;
   transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
@@ -513,7 +517,7 @@ body::before {
 }
 
 .envelope.open .envelope-letter-peek {
-  transform: translateY(-65px);
+  transform: translateY(calc(var(--env-h) * -0.28));
 }
 
 .envelope.open .wax-seal {
@@ -1182,11 +1186,29 @@ body::before {
   display: grid;
   grid-template-columns: 1fr;
   gap: 24px;
+  justify-items: center;
 }
 
-@media (min-width: 720px) {
+@media (min-width: 620px) and (max-width: 920px) {
+  .interactive-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    justify-items: stretch;
+  }
+
+  .interactive-cards-grid .card-women {
+    grid-column: 1 / -1;
+    max-width: 440px;
+    width: 100%;
+    margin: 0 auto;
+  }
+}
+
+@media (min-width: 921px) {
   .interactive-cards-grid {
     grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    justify-items: stretch;
   }
 }
 
@@ -1777,77 +1799,120 @@ body::before {
 /* --------------------------------------------------------------------------
    RESPONSIVE CHO MÀN HÌNH NHỎ (MOBILE & TABLET)
    -------------------------------------------------------------------------- */
-@media (max-width: 600px) {
-  .floral-corner {
-    width: clamp(90px, 25vw, 150px);
-    opacity: 0.8;
+/* Tầng 1: Màn hình Tablet & Thiết bị vừa (max-width: 768px) */
+@media (max-width: 768px) {
+  .card-experience {
+    padding: 16px 14px 60px 14px;
   }
 
-  .floral-corner-top-left {
-    top: -10px;
-    left: -10px;
-  }
-
-  .floral-corner-bottom-right {
-    bottom: -10px;
-    right: -10px;
-  }
-
-  /* Trên mobile giữ phần giữa thoáng tuyệt đối, ẩn 2 góc phụ */
-  .floral-corner-top-right,
-  .floral-corner-bottom-left {
-    display: none;
-  }
-}
-
-@media (max-width: 480px) {
-  .floating-controls {
-    top: max(10px, env(safe-area-inset-top));
-    right: 10px;
-    gap: 8px;
-  }
-
-  .control-btn {
-    width: 38px;
-    height: 38px;
-  }
-
-  .contest-chip {
-    max-width: 82%;
-    font-size: 0.78rem;
-    padding: 6px 14px;
-    line-height: 1.35;
-  }
-
-  .contest-badge {
-    max-width: 84%;
-    font-size: 0.78rem;
-    padding: 6px 14px;
-    line-height: 1.35;
-    margin: 0 auto 14px auto;
+  .scrapbook-section {
+    margin-bottom: 36px;
   }
 
   .scrapbook-paper {
-    padding: 28px 16px;
-    outline-offset: -5px;
+    padding: 32px 20px;
+    outline-offset: -6px;
   }
 
-  .letter-paper {
-    padding: 32px 18px 24px 20px;
+  .washi-top-left,
+  .washi-top-right {
+    width: 80px;
+    height: 22px;
+  }
+
+  /* Khối nhân vật trung tâm trên tablet */
+  .hero-character-wrapper {
+    max-width: 400px;
   }
 
   .scrapbook-sticky {
     position: relative;
     bottom: auto;
     left: auto;
-    margin: 12px auto 0 auto;
-    max-width: 100%;
-    transform: rotate(0deg);
+    max-width: 320px;
+    width: 90%;
+    margin: 14px auto 0 auto;
+    transform: rotate(-1deg);
+    text-align: center;
+  }
+
+  .scrapbook-sticky .tape-corner {
+    top: -8px;
+  }
+
+  .ribbon-banner {
+    max-width: 90%;
+    text-align: center;
+    font-size: 0.9rem;
+    padding: 8px 20px;
+  }
+
+  .letter-paper {
+    padding: 32px 22px 28px 24px;
+    border-left-width: 5px;
+  }
+
+  .share-feature-box {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+    padding: 24px 18px;
+  }
+
+  #main-share-btn {
+    width: 100%;
+    max-width: 360px;
+  }
+
+  .closing-paper {
+    padding: 36px 18px 28px 18px;
+  }
+}
+
+/* Tầng 2: Màn hình Điện thoại thông minh (max-width: 600px) */
+@media (max-width: 600px) {
+  html {
+    font-size: 15px;
+  }
+
+  .card-experience {
+    padding: 12px 10px 50px 10px;
+  }
+
+  .scrapbook-section {
+    margin-bottom: 28px;
+  }
+
+  .scrapbook-paper {
+    padding: 26px 14px;
+    outline-offset: -5px;
+    border-radius: var(--border-radius-md);
+  }
+
+  .floral-corner {
+    width: clamp(80px, 22vw, 130px);
+    opacity: 0.75;
+  }
+
+  .floral-corner-top-left {
+    top: -8px;
+    left: -8px;
+  }
+
+  .floral-corner-bottom-right {
+    bottom: -8px;
+    right: -8px;
+  }
+
+  .floral-corner-top-right,
+  .floral-corner-bottom-left {
+    display: none;
   }
 
   .washi-top-center {
     width: 100px;
-    height: 22px;
+    height: 20px;
+    top: -10px;
   }
 
   .washi-top-left,
@@ -1855,37 +1920,244 @@ body::before {
     display: none;
   }
 
-  .hero-main-title {
-    font-size: 2.8rem;
+  /* Tiêu đề & Bảng thông tin Hero */
+  .contest-badge {
+    max-width: 100%;
+    font-size: 0.78rem;
+    padding: 6px 14px;
+    line-height: 1.35;
+    margin: 0 auto 12px auto;
   }
 
-  .btn-large {
+  .hero-main-title {
+    font-size: clamp(2.4rem, 10vw, 3.2rem);
+  }
+
+  .hero-lead-quote {
+    font-size: clamp(1.2rem, 5vw, 1.45rem);
+  }
+
+  .hero-dedication {
+    font-size: 0.95rem;
+    padding: 0 4px;
+    margin-bottom: 20px;
+  }
+
+  .girl-portrait {
+    max-width: min(320px, 85vw);
+  }
+
+  /* Bức thư: Không dùng justify trên màn hình hẹp để tránh lỗi khoảng cách từ */
+  .letter-paper {
+    padding: 26px 14px 22px 16px;
+    border-left-width: 4px;
+  }
+
+  .letter-title {
+    font-size: clamp(2rem, 8vw, 2.6rem);
+  }
+
+  .letter-salutation {
+    font-size: 1.45rem;
+  }
+
+  .letter-para {
+    font-size: 1.02rem;
+    line-height: 1.7;
+    text-align: left;
+  }
+
+  .letter-signoff {
+    font-size: 1.45rem;
+  }
+
+  .letter-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 16px;
+  }
+
+  .signature-name {
+    font-size: 1.65rem;
+  }
+
+  /* Thẻ tương tác Section 4 */
+  .interactive-card {
+    padding: 22px 14px 18px 14px;
+    max-width: 360px;
     width: 100%;
   }
 
   .card-polaroid {
-    max-width: 200px;
+    max-width: 210px;
+    padding: 6px 6px 10px 6px;
   }
 
   .polaroid-photo {
     height: 135px;
   }
 
+  .card-title {
+    font-size: 1.45rem;
+  }
+
+  .card-preview {
+    font-size: 0.88rem;
+    margin-bottom: 14px;
+  }
+
+  .card-action-btn {
+    padding: 10px 14px;
+    font-size: 0.9rem;
+  }
+
+  /* Màn hình kết thúc */
+  .closing-quote {
+    font-size: clamp(1.6rem, 6.5vw, 2.2rem);
+    line-height: 1.25;
+  }
+
+  .closing-main-congrat {
+    font-size: 1.2rem;
+  }
+
+  .closing-sub {
+    font-size: 0.92rem;
+  }
+
+  .closing-actions {
+    flex-direction: column;
+    width: 100%;
+    max-width: 340px;
+    margin: 0 auto 28px auto;
+    gap: 10px;
+  }
+
+  .closing-actions .btn {
+    width: 100%;
+  }
+
+  .btn-large {
+    width: 100%;
+  }
+
+  /* Modal trên di động */
+  .modal-backdrop {
+    padding: 10px;
+  }
+
+  .modal-dialog {
+    padding: 24px 14px 18px 14px;
+    border-radius: var(--border-radius-md);
+    max-height: calc(100dvh - 20px);
+    max-height: calc(100vh - 20px);
+  }
+
+  .modal-header {
+    padding-right: 36px;
+    margin-bottom: 12px;
+  }
+
+  .modal-title {
+    font-size: 1.6rem;
+  }
+
+  .modal-photo-card {
+    padding: 6px 6px 10px 6px;
+    margin-bottom: 14px;
+  }
+
   .modal-photo-frame {
-    max-height: 220px;
+    max-height: 210px;
   }
 
   .modal-photo-img {
-    max-height: 220px;
+    max-height: 210px;
   }
 
   .modal-photo-caption {
     font-size: 1.05rem;
+    margin-top: 8px;
+  }
+
+  .modal-quote {
+    font-size: 0.95rem;
+    padding-left: 10px;
+  }
+
+  .modal-body {
+    font-size: 0.96rem;
+    line-height: 1.65;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .modal-footer {
+    flex-direction: column;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .modal-footer .btn {
+    width: 100%;
+    justify-content: center;
   }
 
   .modal-floral-tribute {
     flex-direction: column;
     text-align: center;
     gap: 8px;
+    padding: 12px 10px;
+  }
+
+  .tribute-badge-text {
+    font-size: 0.88rem;
+  }
+}
+
+/* Tầng 3: Màn hình điện thoại siêu nhỏ (max-width: 375px - như iPhone SE) */
+@media (max-width: 375px) {
+  html {
+    font-size: 14px;
+  }
+
+  .contest-chip {
+    font-size: 0.72rem;
+    padding: 5px 10px;
+  }
+
+  .envelope-heading {
+    font-size: 1.95rem;
+  }
+
+  .envelope-subtitle {
+    font-size: 0.88rem;
+  }
+
+  .hero-main-title {
+    font-size: 2.2rem;
+  }
+
+  .girl-portrait {
+    max-width: 260px;
+  }
+
+  .handwriting-text {
+    font-size: 1.05rem;
+  }
+
+  .card-polaroid {
+    max-width: 190px;
+  }
+
+  .polaroid-photo {
+    height: 125px;
+  }
+
+  .modal-photo-frame,
+  .modal-photo-img {
+    max-height: 175px;
   }
 }
