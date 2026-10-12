@@ -1202,6 +1202,7 @@ body::before {
   align-items: center;
   text-align: center;
   transition: transform var(--transition-bounce), box-shadow var(--transition-normal);
+  cursor: pointer;
 }
 
 .interactive-card:hover {
@@ -1209,28 +1210,125 @@ body::before {
   box-shadow: var(--shadow-paper-hover);
 }
 
-.card-pin {
-  position: absolute;
-  top: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  filter: drop-shadow(0 2px 4px rgba(57, 43, 45, 0.15));
+/* Khung ảnh Polaroid lưu giữ kỷ niệm trong mỗi thẻ tương tác */
+.card-polaroid {
+  position: relative;
+  width: 100%;
+  max-width: 220px;
+  background: #FFFDF9;
+  padding: 8px 8px 12px 8px;
+  border-radius: var(--border-radius-sm);
+  box-shadow: 0 8px 20px rgba(57, 43, 45, 0.08);
+  border: 1px solid #EFE0D7;
+  margin: 0 auto 16px auto;
+  transition: transform var(--transition-bounce), box-shadow var(--transition-normal);
 }
 
-.card-icon-circle {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: var(--color-cream-light);
-  border: 2px solid var(--color-pink-soft);
+.card-mom .card-polaroid {
+  transform: rotate(-1.5deg);
+}
+
+.card-teacher .card-polaroid {
+  transform: rotate(1.5deg);
+}
+
+.card-women .card-polaroid {
+  transform: rotate(-0.5deg);
+}
+
+.interactive-card:hover .card-polaroid {
+  transform: rotate(0deg) scale(1.03);
+  box-shadow: 0 12px 28px rgba(233, 30, 99, 0.14);
+}
+
+/* Băng dính Washi Tape dán trên ảnh */
+.polaroid-pin-tape {
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48px;
+  height: 14px;
+  background: rgba(244, 140, 165, 0.65);
+  border-left: 2px dashed rgba(255, 255, 255, 0.9);
+  border-right: 2px dashed rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 5px rgba(57, 43, 45, 0.08);
+  z-index: 2;
+}
+
+.card-teacher .polaroid-pin-tape {
+  background: rgba(144, 180, 148, 0.7);
+}
+
+.polaroid-photo {
+  width: 100%;
+  height: 148px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #F8ECE4;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 14px;
-  box-shadow: 0 4px 10px rgba(233, 30, 99, 0.08);
+}
+
+.polaroid-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 25%;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.interactive-card:hover .polaroid-img {
+  transform: scale(1.05);
+}
+
+/* Thẻ số 3: Thiết kế nghệ thuật cho tất cả phụ nữ */
+.polaroid-art-bg {
+  background: linear-gradient(135deg, #FFF0F4 0%, #FCE8EE 100%);
+}
+
+.polaroid-art-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.art-badge-text {
+  font-family: var(--font-handwriting);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-rose-deep);
+  letter-spacing: 1.5px;
+}
+
+.polaroid-label {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--font-handwriting);
+  font-size: 1.18rem;
+  font-weight: 700;
+  color: var(--color-rose-deep);
+  line-height: 1.2;
+}
+
+.card-teacher .polaroid-label {
+  color: var(--color-botanical-green);
+}
+
+.card-teacher .card-title {
+  color: var(--color-botanical-green);
+}
+
+.card-teacher .card-action-btn {
+  background: var(--color-botanical-green);
+}
+
+.card-teacher .card-action-btn:hover {
+  background: #243825;
 }
 
 .card-title {
@@ -1514,6 +1612,80 @@ body::before {
   padding-left: 12px;
 }
 
+/* Khung ảnh lưu niệm bên trong Modal */
+.modal-photo-card {
+  background: #FFFDF8;
+  border: 1px solid #EFE0D7;
+  border-radius: var(--border-radius-md);
+  padding: 10px 10px 14px 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 6px 18px rgba(57, 43, 45, 0.06);
+  position: relative;
+}
+
+.modal-photo-frame {
+  width: 100%;
+  max-height: 290px;
+  overflow: hidden;
+  border-radius: var(--border-radius-sm);
+  background: #FAF3EE;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-photo-img {
+  width: 100%;
+  height: auto;
+  max-height: 290px;
+  object-fit: contain;
+  display: block;
+  border-radius: var(--border-radius-sm);
+  transition: transform 0.3s ease;
+}
+
+.modal-photo-caption {
+  margin-top: 10px;
+  font-family: var(--font-handwriting);
+  font-size: 1.2rem;
+  color: var(--color-rose-deep);
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: center;
+}
+
+#modal-teacher .modal-photo-caption {
+  color: var(--color-botanical-green);
+}
+
+.caption-icon {
+  display: inline-block;
+  margin-right: 4px;
+}
+
+/* Biểu ngữ vinh danh phụ nữ trong Modal 3 */
+.modal-floral-tribute {
+  background: #FFF7F2;
+  border: 1px dashed var(--color-pink-soft);
+  border-radius: var(--border-radius-md);
+  padding: 14px 16px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.tribute-icon-wrapper {
+  flex-shrink: 0;
+}
+
+.tribute-badge-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-rose-deep);
+  line-height: 1.45;
+}
+
 .modal-footer {
   display: flex;
   gap: 12px;
@@ -1689,5 +1861,31 @@ body::before {
 
   .btn-large {
     width: 100%;
+  }
+
+  .card-polaroid {
+    max-width: 200px;
+  }
+
+  .polaroid-photo {
+    height: 135px;
+  }
+
+  .modal-photo-frame {
+    max-height: 220px;
+  }
+
+  .modal-photo-img {
+    max-height: 220px;
+  }
+
+  .modal-photo-caption {
+    font-size: 1.05rem;
+  }
+
+  .modal-floral-tribute {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
   }
 }

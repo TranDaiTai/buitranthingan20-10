@@ -344,9 +344,22 @@
   }
 
   cardActionBtns.forEach((btn) => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
       const targetId = btn.getAttribute('data-target');
       if (targetId) openWishModal(targetId);
+    });
+  });
+
+  document.querySelectorAll('.interactive-card').forEach((card) => {
+    card.addEventListener('click', (e) => {
+      if (!e.target.closest('.card-action-btn')) {
+        const btn = card.querySelector('.card-action-btn');
+        if (btn) {
+          const targetId = btn.getAttribute('data-target');
+          if (targetId) openWishModal(targetId);
+        }
+      }
     });
   });
 

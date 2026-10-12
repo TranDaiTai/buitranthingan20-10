@@ -320,12 +320,12 @@
         <div class="interactive-cards-grid" role="list">
           <!-- THẺ 1: GỬI MẸ MỘT LỜI YÊU THƯƠNG -->
           <article class="interactive-card card-mom" role="listitem">
-         
-            <div class="card-icon-circle" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="28" height="28" fill="#E91E63">
-                <path
-                  d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-              </svg>
+            <div class="card-polaroid" aria-hidden="true">
+              <div class="polaroid-pin-tape"></div>
+              <div class="polaroid-photo">
+                <img src="./assets/with_mother.jpg" alt="Khoảnh khắc ấm áp của em bé Bùi Trần Thủy Ngân bên mẹ" class="polaroid-img" loading="lazy">
+              </div>
+              <span class="polaroid-label">Khoảnh khắc bên mẹ</span>
             </div>
             <h3 class="card-title">Gửi mẹ một lời yêu thương</h3>
             <p class="card-preview">Dành tặng người mẹ tần tảo, bến đỗ bình yên dịu dàng nhất của cuộc đời con...</p>
@@ -336,12 +336,12 @@
 
           <!-- THẺ 2: TRI ÂN CÔ GIÁO -->
           <article class="interactive-card card-teacher" role="listitem">
-          
-            <div class="card-icon-circle" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="28" height="28" fill="#344E35">
-                <path
-                  d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z" />
-              </svg>
+            <div class="card-polaroid" aria-hidden="true">
+              <div class="polaroid-pin-tape"></div>
+              <div class="polaroid-photo">
+                <img src="./assets/with_class.jpg" alt="Kỷ niệm ngày tựu trường cùng cô giáo và các bạn học sinh Thuận Kiều" class="polaroid-img" loading="lazy">
+              </div>
+              <span class="polaroid-label">Kỷ niệm cùng cô giáo</span>
             </div>
             <h3 class="card-title">Tri ân cô giáo</h3>
             <p class="card-preview">Kính gửi người mẹ thứ hai đã nâng bước tri thức và dìu dắt con từng ngày...</p>
@@ -352,12 +352,20 @@
 
           <!-- THẺ 3: LAN TỎA YÊU THƯƠNG -->
           <article class="interactive-card card-women" role="listitem">
-            
-            <div class="card-icon-circle" aria-hidden="true">
-              <svg viewBox="0 0 24 24" width="28" height="28" fill="#E91E63">
-                <path
-                  d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 21l3.52-.92C9.37 20.66 10.64 21 12 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z" />
-              </svg>
+            <div class="card-polaroid polaroid-art" aria-hidden="true">
+              <div class="polaroid-pin-tape"></div>
+              <div class="polaroid-photo polaroid-art-bg">
+                <div class="polaroid-art-inner">
+                  <svg viewBox="0 0 48 48" width="44" height="44" fill="none">
+                    <circle cx="24" cy="24" r="22" fill="#FFF1E9" stroke="#F48CA5" stroke-width="1.5" />
+                    <path
+                      d="M24 33 C14 25 9 19 9 14 C9 9 13 6 18 6 C21 6 23 8 24 10 C25 8 27 6 30 6 C35 6 39 9 39 14 C39 19 34 25 24 33 Z"
+                      fill="#E91E63" />
+                  </svg>
+                  <span class="art-badge-text">20 • 10</span>
+                </div>
+              </div>
+              <span class="polaroid-label">Vạn đóa hoa yêu thương</span>
             </div>
             <h3 class="card-title">Lan tỏa yêu thương</h3>
             <p class="card-preview">Gửi đến tất cả những người phụ nữ tuyệt vời quanh ta ngàn đóa hoa rạng rỡ nhất...
@@ -445,6 +453,20 @@
         <h3 id="mom-modal-title" class="modal-title">Gửi Mẹ – Bến đỗ bình yên nhất</h3>
       </div>
       <div class="modal-body">
+        <figure class="modal-photo-card">
+          <div class="modal-photo-frame">
+            <img 
+              src="./assets/with_mother.jpg" 
+              alt="Khoảnh khắc hạnh phúc và ấm áp của em bé Bùi Trần Thủy Ngân bên mẹ" 
+              class="modal-photo-img"
+              loading="lazy"
+            >
+          </div>
+          <figcaption class="modal-photo-caption">
+            <span class="caption-icon" aria-hidden="true">♥</span> “Bên mẹ, con luôn là em bé hạnh phúc và bình yên nhất.”
+          </figcaption>
+        </figure>
+
         <p class="modal-quote">
           “Mẹ là người phụ nữ tuyệt vời nhất trên đời, người luôn dang rộng vòng tay che chở và dành cho con những điều
           tốt đẹp nhất.”
@@ -472,6 +494,20 @@
         <h3 id="teacher-modal-title" class="modal-title">Tri Ân Cô Giáo Kính Yêu</h3>
       </div>
       <div class="modal-body">
+        <figure class="modal-photo-card">
+          <div class="modal-photo-frame">
+            <img 
+              src="./assets/with_class.jpg" 
+              alt="Em bé Bùi Trần Thủy Ngân cùng cô giáo và các bạn học sinh trong ngày tựu trường Thuận Kiều" 
+              class="modal-photo-img"
+              loading="lazy"
+            >
+          </div>
+          <figcaption class="modal-photo-caption">
+            <span class="caption-icon" aria-hidden="true">★</span> “Kỷ niệm ngày tựu trường rạng rỡ bên cô giáo kính yêu và các bạn học sinh Thuận Kiều.”
+          </figcaption>
+        </figure>
+
         <p class="modal-quote">
           “Dưới ánh mặt trời, không có nghề nào cao quý hơn nghề dạy học.”
         </p>
@@ -498,6 +534,17 @@
         <h3 id="women-modal-title" class="modal-title">Gửi Những Người Phụ Nữ Tuyệt Vời</h3>
       </div>
       <div class="modal-body">
+        <div class="modal-floral-tribute">
+          <div class="tribute-icon-wrapper" aria-hidden="true">
+            <svg viewBox="0 0 64 64" width="46" height="46" fill="none">
+              <circle cx="32" cy="32" r="30" fill="#FFF1E9" stroke="#E91E63" stroke-width="2"/>
+              <path d="M32 46 C18 35 12 26 12 19 C12 12 17 8 24 8 C28 8 30.5 10 32 12.5 C33.5 10 36 8 40 8 C47 8 52 12 52 19 C52 26 46 35 32 46 Z" fill="#E91E63"/>
+              <polygon points="32,16 34,22 41,22 35.5,26 37.5,32 32,28 26.5,32 28.5,26 23,22 30,22" fill="#FFD13B"/>
+            </svg>
+          </div>
+          <p class="tribute-badge-text">20/10 — Tôn vinh vẻ đẹp, lòng nhân ái và sự dịu dàng của tất cả những người phụ nữ Việt Nam</p>
+        </div>
+
         <p class="modal-quote">
           “Mỗi người phụ nữ là một đóa hoa thơm ngát, mang lại vẻ đẹp và sự dịu dàng cho thế giới này.”
         </p>
