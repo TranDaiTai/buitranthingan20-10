@@ -21,7 +21,6 @@
   const musicTooltip = document.getElementById('music-tooltip');
   const bgAudio = document.getElementById('bg-audio');
 
-  const effectsToggle = document.getElementById('effects-toggle');
   const scrollTopBtn = document.getElementById('scroll-top-btn');
 
   const showAllTextBtn = document.getElementById('show-all-text-btn');
@@ -57,7 +56,10 @@
       envelope.classList.add('open');
     }
 
-    // 2. Sau khi animation phong bì hoàn tất, làm mờ màn hình 1 và hiển thị thiệp chính
+    // 2. Kích hoạt hiệu ứng vài cánh hoa rơi chậm thoáng qua chỉ trong lúc mở thiệp
+    triggerBriefPetalShower();
+
+    // 3. Sau khi animation phong bì hoàn tất, làm mờ màn hình 1 và hiển thị thiệp chính
     setTimeout(() => {
       screenEnvelope.classList.add('fade-out');
       
@@ -287,6 +289,7 @@
   }
 
   function updateMusicButtonUI(playing) {
+    if (!musicToggle) return;
     if (playing) {
       musicToggle.classList.add('playing');
       musicToggle.classList.add('active');
@@ -462,10 +465,12 @@
 
   // Nút cuộn lên đầu trang
   window.addEventListener('scroll', () => {
-    if (window.scrollY > 400) {
-      scrollTopBtn.classList.remove('hidden');
-    } else {
-      scrollTopBtn.classList.add('hidden');
+    if (scrollTopBtn) {
+      if (window.scrollY > 400) {
+        scrollTopBtn.classList.remove('hidden');
+      } else {
+        scrollTopBtn.classList.add('hidden');
+      }
     }
   });
 
@@ -476,98 +481,72 @@
   }
 
   // =========================================================================
-  // 7. CANVAS HIỆU ỨNG CÁNH HOA & TRÁI TIM BAY (PETAL CANVAS)
+  // 7. HIỆU ỨNG CÁNH HOA RƠI THOÁNG QUA KHI MỞ THIỆP (PETAL SHOWER)
+  // Chỉ rơi vài cánh hoa chậm trong thời gian ngắn (3-4 giây), không lặp liên tục
   // =========================================================================
   const canvas = document.getElementById('petal-canvas');
   let ctx = null;
-  let particles = [];
   let animationFrameId = null;
-  let isEffectsActive = true;
-
-  // Kiểm tra cấu hình prefers-reduced-motion của người dùng
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  class Particle {
-    constructor(w, h) {
-      this.reset(w, h, true);
-    }
+  // Tải trước hình ảnh cánh hoa màu nước chất lượng cao
+  const petalImages = [];
+  const petalSources = ['./assets/petal-1.png', './assets/petal-2.png', './assets/petal-3.png'];
+  petalSources.forEach((src) => {
+    const img = new Image();
+    img.src = src;
+    petalImages.push(img);
+  });
 
-    reset(w, h, initial = false) {
+  class FallingPetal {
+    constructor(w) {
+      this.img = petalImages[Math.floor(Math.random() * petalImages.length)];
       this.x = Math.random() * w;
-      this.y = initial ? Math.random() * h : -20;
-      this.size = Math.random() * 12 + 8;
-      this.speedY = Math.random() * 1.4 + 0.6;
-      this.speedX = (Math.random() - 0.5) * 1.0;
+      this.y = Math.random() * -120 - 20; // Xuất phát so le phía trên màn hình
+      this.size = Math.random() * 14 + 20; // 20px - 34px nhỏ nhắn, tự nhiên
+      this.speedY = Math.random() * 0.9 + 0.8; // Rơi rất chậm và êm
+      this.speedX = (Math.random() - 0.5) * 0.7;
       this.rotation = Math.random() * Math.PI * 2;
-      this.rotSpeed = (Math.random() - 0.5) * 0.03;
-      this.opacity = Math.random() * 0.5 + 0.4;
-      this.oscillation = Math.random() * 100;
-      this.type = Math.random() > 0.35 ? 'petal' : 'heart'; // 65% cánh hoa, 35% trái tim
-      
-      // Màu sắc pastel nhẹ nhàng
-      const colors = ['#F16B85', '#F8DDE5', '#C92D5A', '#FFAEC0', '#FFFFFF'];
-      this.color = colors[Math.floor(Math.random() * colors.length)];
+      this.rotSpeed = (Math.random() - 0.5) * 0.02;
+      this.swayPhase = Math.random() * Math.PI * 2;
+      this.swaySpeed = Math.random() * 0.02 + 0.015;
+      this.opacity = Math.random() * 0.3 + 0.7;
     }
 
-    update(w, h) {
+    update() {
       this.y += this.speedY;
-      this.oscillation += 0.02;
-      this.x += Math.sin(this.oscillation) * 0.8 + this.speedX;
+      this.swayPhase += this.swaySpeed;
+      this.x += Math.sin(this.swayPhase) * 1.1 + this.speedX;
       this.rotation += this.rotSpeed;
-
-      if (this.y > h + 20 || this.x < -30 || this.x > w + 30) {
-        this.reset(w, h, false);
-      }
     }
 
-    draw(ctx) {
-      ctx.save();
-      ctx.translate(this.x, this.y);
-      ctx.rotate(this.rotation);
-      ctx.globalAlpha = this.opacity;
+    draw(context, canvasHeight) {
+      context.save();
+      context.translate(this.x, this.y);
+      context.rotate(this.rotation);
 
-      if (this.type === 'petal') {
-        // Vẽ cánh hoa mẫu đơn / hoa anh đào
-        ctx.fillStyle = this.color;
-        ctx.beginPath();
-        ctx.ellipse(0, 0, this.size * 0.6, this.size, 0, 0, Math.PI * 2);
-        ctx.fill();
+      // Làm mờ nhẹ khi gần chạm đáy màn hình
+      let alpha = this.opacity;
+      if (this.y > canvasHeight * 0.75) {
+        alpha *= Math.max(0, 1 - (this.y - canvasHeight * 0.75) / (canvasHeight * 0.25));
+      }
+      context.globalAlpha = Math.max(0, Math.min(1, alpha));
+
+      if (this.img && this.img.complete && this.img.naturalWidth > 0) {
+        context.drawImage(this.img, -this.size / 2, -this.size / 2, this.size, this.size);
       } else {
-        // Vẽ trái tim nhỏ bay
-        ctx.fillStyle = this.color;
-        const s = this.size * 0.6;
-        ctx.beginPath();
-        ctx.moveTo(0, s * 0.3);
-        ctx.bezierCurveTo(-s, -s * 0.5, -s * 1.2, s * 0.4, 0, s * 1.2);
-        ctx.bezierCurveTo(s * 1.2, s * 0.4, s, -s * 0.5, 0, s * 0.3);
-        ctx.fill();
+        // Dự phòng bằng hình elip cánh hoa mềm mại nếu ảnh chưa nạp xong
+        context.fillStyle = '#F48CA5';
+        context.beginPath();
+        context.ellipse(0, 0, this.size * 0.45, this.size * 0.75, 0, 0, Math.PI * 2);
+        context.fill();
       }
 
-      ctx.restore();
+      context.restore();
     }
   }
 
-  function initPetalCanvas() {
-    if (!canvas || prefersReducedMotion) {
-      if (effectsToggle) effectsToggle.style.display = 'none';
-      return;
-    }
-
-    ctx = canvas.getContext('2d');
-    resizeCanvas();
-
-    // Giới hạn 28 hạt để tối ưu hiệu năng mượt mà nhất trên điện thoại
-    const count = 28;
-    particles = [];
-    for (let i = 0; i < count; i++) {
-      particles.push(new Particle(canvas.width, canvas.height));
-    }
-
-    window.addEventListener('resize', debounce(resizeCanvas, 150));
-    animateParticles();
-  }
-
-  function resizeCanvas() {
+  function resizePetalCanvas() {
     if (!canvas) return;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = window.innerWidth * dpr;
@@ -575,55 +554,54 @@
     if (ctx) ctx.scale(dpr, dpr);
   }
 
-  function animateParticles() {
-    if (!isEffectsActive || prefersReducedMotion) return;
+  function triggerBriefPetalShower() {
+    if (!canvas || prefersReducedMotion) return;
 
-    const w = window.innerWidth;
-    const h = window.innerHeight;
+    ctx = canvas.getContext('2d');
+    resizePetalCanvas();
+    canvas.style.display = 'block';
 
-    ctx.clearRect(0, 0, w, h);
-
-    for (let i = 0; i < particles.length; i++) {
-      particles[i].update(w, h);
-      particles[i].draw(ctx);
+    // Tạo đúng 12 cánh hoa rơi nhẹ nhàng tự nhiên
+    const showerPetals = [];
+    const count = 12;
+    for (let i = 0; i < count; i++) {
+      showerPetals.push(new FallingPetal(window.innerWidth));
     }
 
-    animationFrameId = requestAnimationFrame(animateParticles);
-  }
+    const startTime = performance.now();
+    const duration = 4000; // Hiệu ứng kéo dài tối đa 4 giây rồi tự động dừng sạch sẽ
 
-  function toggleEffects() {
-    isEffectsActive = !isEffectsActive;
-    if (isEffectsActive) {
-      effectsToggle.classList.add('active');
-      canvas.style.display = 'block';
-      animateParticles();
-    } else {
-      effectsToggle.classList.remove('active');
-      canvas.style.display = 'none';
-      if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-        animationFrameId = null;
+    function renderShower(currentTime) {
+      const elapsed = currentTime - startTime;
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+
+      ctx.clearRect(0, 0, w, h);
+
+      let anyAlive = false;
+      for (let i = 0; i < showerPetals.length; i++) {
+        showerPetals[i].update();
+        showerPetals[i].draw(ctx, h);
+        if (showerPetals[i].y < h + 40) {
+          anyAlive = true;
+        }
+      }
+
+      // Khi hết thời gian hoặc tất cả cánh hoa đã rơi xong: DỪNG HẲN LOOP
+      if (elapsed < duration && anyAlive) {
+        animationFrameId = requestAnimationFrame(renderShower);
+      } else {
+        if (animationFrameId) {
+          cancelAnimationFrame(animationFrameId);
+          animationFrameId = null;
+        }
+        ctx.clearRect(0, 0, w, h);
+        canvas.style.display = 'none';
+        // Hoàn toàn không còn timer hay requestAnimationFrame nào chạy nền
       }
     }
-  }
 
-  if (effectsToggle) {
-    effectsToggle.addEventListener('click', toggleEffects);
+    animationFrameId = requestAnimationFrame(renderShower);
   }
-
-  function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
-      };
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-    };
-  }
-
-  // Khởi động canvas
-  initPetalCanvas();
 
 })();
