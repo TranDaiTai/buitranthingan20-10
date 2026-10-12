@@ -19,7 +19,11 @@
 
   const musicToggle = document.getElementById('music-toggle');
   const musicTooltip = document.getElementById('music-tooltip');
-  const bgAudio = document.getElementById('bg-audio');
+  const ytMusicWidget = document.getElementById('yt-music-widget');
+  const ytPlayToggleBtn = document.getElementById('yt-play-toggle-btn');
+  const ytPlayPauseIcon = document.getElementById('yt-play-pause-icon');
+  const ytExpandToggleBtn = document.getElementById('yt-expand-toggle-btn');
+  const ytExpandIcon = document.getElementById('yt-icon-expand');
 
   const scrollTopBtn = document.getElementById('scroll-top-btn');
 
@@ -59,14 +63,17 @@
     // 2. Kích hoạt hiệu ứng vài cánh hoa rơi chậm thoáng qua chỉ trong lúc mở thiệp
     triggerBriefPetalShower();
 
+    // 3. Kích hoạt phát nhạc nền YouTube (Bài hát 20/10, không loop, phát 1 lần)
+    startYouTubeMusic();
+
     // 3. Sau khi animation phong bì hoàn tất, làm mờ màn hình 1 và hiển thị thiệp chính
     setTimeout(() => {
       screenEnvelope.classList.add('fade-out');
-      
+
       setTimeout(() => {
         screenEnvelope.style.display = 'none';
         mainCardExperience.classList.remove('hidden');
-        
+
         // Kích hoạt hiển thị mềm mại
         requestAnimationFrame(() => {
           mainCardExperience.style.opacity = '1';
@@ -170,142 +177,200 @@
   }
 
   // =========================================================================
-  // 4. HỆ THỐNG ÂM NHẠC & SYNTHESIZER DỊU NHẸ DỰ PHÒNG
+  // 4. HỆ THỐNG PHÁT NHẠC NỀN YOUTUBE IFRAME PLAYER API
+  // Video: Ngày Yêu Thương 20 Tháng 10 (Video ID: nn4jMYTjjTI)
+  // Tính năng: Không autoplay khi quét QR; Tự động phát khi bấm mở thiệp;
+  // Phát trọn vẹn 1 lần (không lặp loop, không auto replay);
+  // Nút điều khiển trực quan; Lời nhắc nhẹ nhàng nếu trình duyệt chặn autoplay.
   // =========================================================================
-  let isPlayingMusic = false;
-  let audioContext = null;
-  let synthInterval = null;
-  let isUsingSynthFallback = false;
+  let ytPlayer = null;
+  let isYtPlayerReady = false;
+  let isMusicPlaying = false;
+  let pendingPlayRequest = false;
 
-  // Giai điệu hộp âm nhạc (Music Box Lullaby) êm dịu nếu chưa có file assets/music.mp3
-  const lullabyNotes = [
-    { freq: 523.25, dur: 0.5 }, // C5
-    { freq: 659.25, dur: 0.5 }, // E5
-    { freq: 783.99, dur: 0.6 }, // G5
-    { freq: 880.00, dur: 0.8 }, // A5
-    { freq: 783.99, dur: 0.5 }, // G5
-    { freq: 659.25, dur: 0.6 }, // E5
-    { freq: 587.33, dur: 0.5 }, // D5
-    { freq: 523.25, dur: 1.0 }, // C5
-    { freq: 659.25, dur: 0.5 }, // E5
-    { freq: 783.99, dur: 0.5 }, // G5
-    { freq: 1046.50, dur: 0.9 }, // C6
-    { freq: 880.00, dur: 0.6 }, // A5
-    { freq: 783.99, dur: 0.7 }, // G5
-    { freq: 659.25, dur: 0.6 }, // E5
-    { freq: 587.33, dur: 0.8 }, // D5
-    { freq: 523.25, dur: 1.2 }  // C5
-  ];
+  function initYouTubePlayer() {
+    if (ytPlayer || !window.YT || !window.YT.Player) return;
+    const container = document.getElementById('yt-player-embed');
+    if (!container) return;
 
-  function playSynthNote(freq, duration) {
-    if (!audioContext || audioContext.state === 'suspended') return;
     try {
-      const osc = audioContext.createOscillator();
-      const gain = audioContext.createGain();
+      const playerVars = {
+        autoplay: 0,
+        controls: 1,
+        disablekb: 0,
+        enablejsapi: 1,
+        fs: 0,
+        modestbranding: 1,
+        playsinline: 1,
+        rel: 0
+      };
 
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, audioContext.currentTime);
+      if (window.location.protocol.indexOf('http') === 0 && window.location.origin && window.location.origin !== 'null') {
+        playerVars.origin = window.location.origin;
+      }
 
-      gain.gain.setValueAtTime(0, audioContext.currentTime);
-      gain.gain.linearRampToValueAtTime(0.12, audioContext.currentTime + 0.04);
-      gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + duration);
-
-      osc.connect(gain);
-      gain.connect(audioContext.destination);
-
-      osc.start();
-      osc.stop(audioContext.currentTime + duration);
-    } catch (e) {
-      console.warn('Audio Context error:', e);
-    }
-  }
-
-  function startMusicBox() {
-    isUsingSynthFallback = true;
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContextClass) return;
-
-    if (!audioContext) {
-      audioContext = new AudioContextClass();
-    }
-    if (audioContext.state === 'suspended') {
-      audioContext.resume();
-    }
-
-    let noteIdx = 0;
-    function playNext() {
-      if (!isPlayingMusic) return;
-      const note = lullabyNotes[noteIdx];
-      playSynthNote(note.freq, note.dur);
-      noteIdx = (noteIdx + 1) % lullabyNotes.length;
-      synthInterval = setTimeout(playNext, note.dur * 850 + 200);
-    }
-    playNext();
-  }
-
-  function stopMusicBox() {
-    if (synthInterval) {
-      clearTimeout(synthInterval);
-      synthInterval = null;
-    }
-  }
-
-  function toggleMusic() {
-    if (!isPlayingMusic) {
-      // Người dùng yêu cầu bật nhạc
-      if (bgAudio && bgAudio.src) {
-        const playPromise = bgAudio.play();
-        if (playPromise !== undefined) {
-          playPromise
-            .then(() => {
-              isPlayingMusic = true;
-              updateMusicButtonUI(true);
-            })
-            .catch(() => {
-              // File mp3 chưa sẵn sàng hoặc lỗi: Tự động dùng Music Box êm dịu
-              startMusicBox();
-              isPlayingMusic = true;
-              updateMusicButtonUI(true);
-            });
-        } else {
-          startMusicBox();
-          isPlayingMusic = true;
-          updateMusicButtonUI(true);
+      ytPlayer = new window.YT.Player('yt-player-embed', {
+        width: '240',
+        height: '135',
+        videoId: 'nn4jMYTjjTI',
+        playerVars: playerVars,
+        events: {
+          onReady: onPlayerReady,
+          onStateChange: onPlayerStateChange,
+          onError: onPlayerError
         }
-      } else {
-        startMusicBox();
-        isPlayingMusic = true;
-        updateMusicButtonUI(true);
-      }
-    } else {
-      // Tắt nhạc
-      isPlayingMusic = false;
-      if (bgAudio) {
-        bgAudio.pause();
-      }
-      stopMusicBox();
-      updateMusicButtonUI(false);
+      });
+    } catch (err) {
+      console.warn('Khởi tạo YouTube Player thất bại:', err);
     }
   }
 
-  function updateMusicButtonUI(playing) {
-    if (!musicToggle) return;
-    if (playing) {
-      musicToggle.classList.add('playing');
-      musicToggle.classList.add('active');
-      musicToggle.setAttribute('aria-label', 'Tắt nhạc nền');
-      if (musicTooltip) musicTooltip.textContent = 'Tắt nhạc nền';
-    } else {
-      musicToggle.classList.remove('playing');
-      musicToggle.classList.remove('active');
-      musicToggle.setAttribute('aria-label', 'Bật nhạc nền');
-      if (musicTooltip) musicTooltip.textContent = 'Bật nhạc nền';
+  function onPlayerReady() {
+    isYtPlayerReady = true;
+    if (pendingPlayRequest) {
+      pendingPlayRequest = false;
+      startYouTubeMusic();
+    }
+  }
+
+  function onPlayerStateChange(event) {
+    if (!window.YT) return;
+    if (event.data === window.YT.PlayerState.PLAYING) {
+      isMusicPlaying = true;
+      if (musicToggle) {
+        musicToggle.classList.remove('pulse-attention');
+      }
+      updateMusicUI(true);
+    } else if (event.data === window.YT.PlayerState.PAUSED) {
+      isMusicPlaying = false;
+      updateMusicUI(false);
+    } else if (event.data === window.YT.PlayerState.ENDED) {
+      // Khi bài hát kết thúc: KHÔNG tự động phát lại, giữ nguyên trạng thái kết thúc
+      isMusicPlaying = false;
+      updateMusicUI(false, true);
+      showToast('Đã phát xong bài hát Ngày Yêu Thương 20/10 ♡');
+    }
+  }
+
+  function onPlayerError(event) {
+    console.warn('Lỗi YouTube Player (mã lỗi ' + event.data + ')');
+    isMusicPlaying = false;
+    updateMusicUI(false);
+  }
+
+  // Hook global callback theo yêu cầu của YouTube IFrame API
+  window.onYouTubeIframeAPIReady = function () {
+    initYouTubePlayer();
+  };
+
+  // Khởi tạo ngay nếu thư viện YouTube đã sẵn sàng trong cache
+  if (window.YT && window.YT.Player) {
+    initYouTubePlayer();
+  }
+
+  function startYouTubeMusic() {
+    if (!isYtPlayerReady || !ytPlayer || typeof ytPlayer.playVideo !== 'function') {
+      // Đánh dấu yêu cầu phát, sẽ tự phát ngay khi onPlayerReady được gọi
+      pendingPlayRequest = true;
+      return;
+    }
+
+    try {
+      ytPlayer.playVideo();
+
+      // Kiểm tra chính sách chặn phát tự động (autoplay policy) của trình duyệt
+      setTimeout(() => {
+        if (ytPlayer && typeof ytPlayer.getPlayerState === 'function') {
+          const state = ytPlayer.getPlayerState();
+          // Nếu sau 1.5s chưa phát (do Safari/Chrome di động cần tương tác trực tiếp)
+          if (state !== window.YT.PlayerState.PLAYING && state !== window.YT.PlayerState.BUFFERING) {
+            showToast('Chạm vào biểu tượng 🎵 để thưởng thức bài hát Ngày Yêu Thương 20/10 nhé!');
+            if (musicToggle) {
+              musicToggle.classList.add('pulse-attention');
+            }
+          }
+        }
+      }, 1500);
+    } catch (err) {
+      console.warn('Không thể tự động phát YouTube:', err);
+      showToast('Chạm vào biểu tượng 🎵 để bật bài hát yêu thương nhé!');
+    }
+  }
+
+  function toggleYouTubeMusic() {
+    if (musicToggle) {
+      musicToggle.classList.remove('pulse-attention');
+    }
+
+    if (!isYtPlayerReady || !ytPlayer) {
+      showToast('Đang kết nối bài hát 20/10, vui lòng đợi giây lát...');
+      return;
+    }
+
+    try {
+      const state = typeof ytPlayer.getPlayerState === 'function' ? ytPlayer.getPlayerState() : -1;
+      if (state === window.YT.PlayerState.PLAYING) {
+        ytPlayer.pauseVideo();
+      } else {
+        ytPlayer.playVideo();
+      }
+    } catch (err) {
+      console.warn('Lỗi bật/tắt YouTube player:', err);
+    }
+  }
+
+  function updateMusicUI(playing, ended = false) {
+    // 1. Cập nhật nút điều khiển nổi (#music-toggle)
+    if (musicToggle) {
+      if (playing) {
+        musicToggle.classList.add('playing', 'active');
+        musicToggle.setAttribute('aria-label', 'Tạm dừng nhạc nền');
+        if (musicTooltip) musicTooltip.textContent = 'Tạm dừng nhạc (Ngày Yêu Thương 20/10)';
+      } else {
+        musicToggle.classList.remove('playing', 'active');
+        musicToggle.setAttribute('aria-label', ended ? 'Phát lại bài hát' : 'Bật nhạc nền');
+        if (musicTooltip) musicTooltip.textContent = ended ? 'Phát lại (Ngày Yêu Thương 20/10)' : 'Bật nhạc nền';
+      }
+    }
+
+    // 2. Cập nhật Mini Player Widget (#yt-music-widget)
+    if (ytMusicWidget) {
+      if (playing) {
+        ytMusicWidget.classList.add('playing');
+      } else {
+        ytMusicWidget.classList.remove('playing');
+      }
+    }
+
+    if (ytPlayPauseIcon) {
+      ytPlayPauseIcon.textContent = playing ? '❚❚' : (ended ? '↻' : '▶');
+    }
+
+    if (ytPlayToggleBtn) {
+      ytPlayToggleBtn.setAttribute('title', playing ? 'Tạm dừng' : (ended ? 'Phát lại bài hát' : 'Phát nhạc'));
+      ytPlayToggleBtn.setAttribute('aria-label', playing ? 'Tạm dừng' : (ended ? 'Phát lại' : 'Phát'));
     }
   }
 
   if (musicToggle) {
-    musicToggle.addEventListener('click', toggleMusic);
+    musicToggle.addEventListener('click', toggleYouTubeMusic);
   }
+
+  if (ytPlayToggleBtn) {
+    ytPlayToggleBtn.addEventListener('click', toggleYouTubeMusic);
+  }
+
+  if (ytExpandToggleBtn && ytMusicWidget) {
+    ytExpandToggleBtn.addEventListener('click', () => {
+      ytMusicWidget.classList.toggle('collapsed');
+      const isCollapsed = ytMusicWidget.classList.contains('collapsed');
+      if (ytExpandIcon) {
+        ytExpandIcon.textContent = isCollapsed ? '⤢' : '▾';
+      }
+      ytExpandToggleBtn.setAttribute('title', isCollapsed ? 'Mở rộng video' : 'Thu nhỏ video');
+    });
+  }
+
 
   // =========================================================================
   // 5. CÁC MODAL LỜI CHÚC TƯƠNG TÁC (MÀN HÌNH 4)
@@ -576,13 +641,13 @@
 
     // Tạo đúng 12 cánh hoa rơi nhẹ nhàng tự nhiên
     const showerPetals = [];
-    const count = 12;
+    const count = 36;
     for (let i = 0; i < count; i++) {
       showerPetals.push(new FallingPetal(window.innerWidth));
     }
 
     const startTime = performance.now();
-    const duration = 4000; // Hiệu ứng kéo dài tối đa 4 giây rồi tự động dừng sạch sẽ
+    const duration = 6000; // Hiệu ứng kéo dài tối đa 4 giây rồi tự động dừng sạch sẽ
 
     function renderShower(currentTime) {
       const elapsed = currentTime - startTime;

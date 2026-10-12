@@ -70,28 +70,48 @@
   <!-- Canvas cánh hoa rơi chậm thoáng qua chỉ xuất hiện khi mở thiệp -->
   <canvas id="petal-canvas" aria-hidden="true"></canvas>
 
-  <!-- Thanh điều khiển tiện ích nổi (Floating Controls) -->
-  <!-- <aside class="floating-controls" aria-label="Điều khiển tiện ích">
-    <button id="music-toggle" class="control-btn" aria-label="Bật hoặc tắt nhạc nền" title="Bật/Tắt nhạc nền (Phát nhạc)">
-      <span class="icon-music" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-          <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
-        </svg>
+  <!-- Thanh điều khiển tiện ích nổi (Floating Controls - Luôn dễ tìm) -->
+  <aside class="floating-controls" aria-label="Điều khiển tiện ích">
+    <button id="music-toggle" class="control-btn music-btn" aria-label="Bật hoặc tắt nhạc nền" title="Bật/Tắt nhạc nền (Ngày Yêu Thương 20/10)">
+      <span class="music-icon" aria-hidden="true">🎵</span>
+      <span class="sound-wave" aria-hidden="true">
+        <span class="bar bar-1"></span>
+        <span class="bar bar-2"></span>
+        <span class="bar bar-3"></span>
       </span>
-      <span class="music-wave" aria-hidden="true">
-        <span></span><span></span><span></span>
-      </span>
-      <span class="control-tooltip" id="music-tooltip">Bật nhạc nền</span>
+      <span class="music-tooltip" id="music-tooltip">Nhạc nền 20/10</span>
     </button>
     
-    <button id="scroll-top-btn" class="control-btn hidden" aria-label="Cuộn về đầu trang" title="Về đầu trang">
+    <button id="scroll-top-btn" class="control-btn scroll-top-btn hidden" aria-label="Cuộn về đầu trang" title="Lên đầu trang">
       <span aria-hidden="true">↑</span>
-      <span class="control-tooltip">Lên đầu trang</span>
     </button>
-  </aside> -->
+  </aside>
 
-  <!-- Phần tử âm thanh tùy chọn -->
-  <audio id="bg-audio" src="./assets/music.mp3" preload="none" loop></audio>
+  <!-- Khung phát nhạc YouTube IFrame Player (Mini Player Dock - Tuân thủ YouTube API & Không che khuất nội dung) -->
+  <aside id="yt-music-widget" class="yt-music-widget collapsed" aria-label="Trình phát nhạc Ngày Yêu Thương 20/10">
+    <div class="yt-widget-header">
+      <div class="yt-widget-title-group">
+        <span class="yt-vinyl-disc" aria-hidden="true">💿</span>
+        <div class="yt-title-track">
+          <span class="yt-song-title" title="Bài hát: Ngày Yêu Thương 20 Tháng 10">Ngày Yêu Thương 20/10</span>
+          <span class="yt-song-sub">YouTube IFrame Player</span>
+        </div>
+      </div>
+      <div class="yt-widget-actions">
+        <button id="yt-play-toggle-btn" class="yt-action-btn yt-play-btn" aria-label="Phát hoặc tạm dừng bài hát" title="Phát / Tạm dừng">
+          <span id="yt-play-pause-icon">▶</span>
+        </button>
+        <button id="yt-expand-toggle-btn" class="yt-action-btn yt-expand-btn" aria-label="Mở rộng hoặc thu nhỏ video" title="Mở rộng video">
+          <span id="yt-icon-expand">⤢</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Khung chứa Iframe YouTube đúng tiêu chuẩn hiển thị của YouTube API -->
+    <div id="yt-player-box" class="yt-player-box">
+      <div id="yt-player-embed"></div>
+    </div>
+  </aside>
 
   <!-- MÀN HÌNH 1: PHONG BÌ YÊU THƯƠNG -->
   <section id="screen-envelope" class="screen-envelope-wrapper" aria-label="Màn hình mở phong bì">
@@ -569,6 +589,7 @@
     <span class="toast-message" id="toast-message">Đã sao chép nội dung thành công!</span>
   </div>
 
+  <script src="https://www.youtube.com/iframe_api"></script>
   <script src="./script.js"></script>
 </body>
 
